@@ -34,11 +34,11 @@ def grade_generation_grounded_in_documents_and_question(state: GraphState) -> st
         {"documents": documents, "generation": generation}
     )
 
-    if hallucination_grade := score.binary_score:
+    if hallucination_grade := score['binary_score']:
         print("---DECISION: GENERATION IS GROUNDED IN DOCUMENTS---")
         print("---GRADE GENERATION vs QUESTION---")
         score = answer_grader.invoke({"question": question, "generation": generation})
-        if answer_grade := score.binary_score:
+        if answer_grade := score['binary_score']:
             print("---DECISION: GENERATION ADDRESSES QUESTION---")
             return "useful"
         else:

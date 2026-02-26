@@ -1,4 +1,5 @@
 from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import JsonOutputParser
 from pydantic import BaseModel, Field
 from langchain_core.runnables import RunnableSequence
 from langchain_openai import ChatOpenAI
@@ -11,11 +12,19 @@ class GradeAnswer(BaseModel):
     )
 
 
-llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
-structured_llm_grader = llm.with_structured_output(GradeAnswer)
+llm = ChatOpenAI(
+    model="deepseek-chat",
+    temperature=0,
+    api_key="sk-4c877d83a0704cc98417cb92ec7d3d76",
+    base_url="https://api.deepseek.com/v1",
+    model_kwargs={"response_format": {"type": "json_object"}}
+)
+parser = JsonOutputParser(pydantic_object=GradeAnswer)
 
 system = """You are a grader assessing whether an answer addresses / resolves a question \n 
-     Give a binary score 'yes' or 'no'. Yes' means that the answer resolves the question."""
+     Give a binary score 'yes' or 'no'. Yes' means that the answer resolves the question.
+     
+     Respond with a JSON object in this exact format: {{"binary_score": true}} or {{"binary_score": false}}"""
 answer_prompt = ChatPromptTemplate.from_messages(
     [
         ("system", system),
@@ -23,4 +32,4 @@ answer_prompt = ChatPromptTemplate.from_messages(
     ]
 )
 
-answer_grader: RunnableSequence = answer_prompt | structured_llm_grader
+answer_grader: RunnableSequence = answer_prompt | llm | parser

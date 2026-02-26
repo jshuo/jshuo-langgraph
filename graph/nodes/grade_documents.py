@@ -26,7 +26,7 @@ def grade_documents(state: GraphState) -> Dict[str, Any]:
         score = retrieval_grader.invoke(
             {"question": question, "document": d.page_content}
         )
-        grade = score.binary_score
+        grade = score['binary_score']
         if grade.lower() == "yes":
             print("---GRADE: DOCUMENT RELEVANT---")
             filtered_docs.append(d)
